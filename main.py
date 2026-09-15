@@ -1,45 +1,6 @@
-import cv2
-import matplotlib.pyplot as plt
-import easyocr
+from pipeline import extract_text, to_sorted_items, group_into_lines
 
-def extract_text(image_path):
-    reader = easyocr.Reader(['sv', 'en'])
-    result = reader.readtext(image_path)
-    return result
 result = extract_text('data/raw/kvitto6.jpeg')
-
-
-def to_sorted_items(result):
-    new_three_in_row = []
-    for bbox, text, conf in result:
-        new_three_in_row.append((bbox[0][1], bbox[0][0], text))
-    sorted_list = sorted(new_three_in_row)
-    return sorted_list
-
-def group_into_lines(sorted_list, threshold=10):
-    current_line = []
-    prev_y = 0
-    lines = []
-
-    for y, x, text in sorted_list:
-        if y - prev_y > threshold:
-            sorted_ = sorted(current_line)
-            texts = [t for _, t in sorted_]
-            new_line = ' '.join(texts)
-            lines.append(new_line)
-            current_line = []
-            current_line.append((x, text))
-        elif y - prev_y < threshold:
-            current_line.append((x, text))
-        prev_y = y
-
-    new = sorted(current_line)
-    word = [t for _, t in new]
-    new_line1 = ' '.join(word)
-    lines.append(new_line1)
-
-    return lines
-
 sorted_list = to_sorted_items(result)
 lines = group_into_lines(sorted_list)
 for line in lines:
